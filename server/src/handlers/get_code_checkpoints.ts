@@ -1,8 +1,24 @@
+import { db } from '../db';
+import { codeCheckpointsTable } from '../db/schema';
 import { type CodeCheckpoint } from '../schema';
+import { desc } from 'drizzle-orm';
 
-export async function getCodeCheckpoints(): Promise<CodeCheckpoint[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all code checkpoints from the database.
-    // It should return a list of all checkpoints ordered by creation date (newest first).
-    return [];
-}
+export const getCodeCheckpoints = async (): Promise<CodeCheckpoint[]> => {
+  try {
+    // Fetch all code checkpoints ordered by creation date (newest first)
+    const results = await db.select()
+      .from(codeCheckpointsTable)
+      .orderBy(desc(codeCheckpointsTable.created_at))
+      .execute();
+
+    // Return results with proper type conversion for embedding array
+    return results.map(checkpoint => ({
+      ...checkpoint,
+      // Ensure embedding is properly typed as number array
+      embedding: checkpoint.embedding as number[]
+    }));
+  } catch (error) {
+    console.error('Failed to fetch code checkpoints:', error);
+    throw error;
+  }
+};

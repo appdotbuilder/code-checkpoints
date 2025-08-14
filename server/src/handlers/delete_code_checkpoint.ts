@@ -1,6 +1,18 @@
-export async function deleteCodeCheckpoint(id: number): Promise<boolean> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a code checkpoint by its ID.
-    // It should return true if the checkpoint was successfully deleted, false if not found.
-    return false;
-}
+import { db } from '../db';
+import { codeCheckpointsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+
+export const deleteCodeCheckpoint = async (id: number): Promise<boolean> => {
+  try {
+    // Delete the code checkpoint by ID
+    const result = await db.delete(codeCheckpointsTable)
+      .where(eq(codeCheckpointsTable.id, id))
+      .execute();
+
+    // Check if any rows were affected (i.e., checkpoint was found and deleted)
+    return (result.rowCount ?? 0) > 0;
+  } catch (error) {
+    console.error('Code checkpoint deletion failed:', error);
+    throw error;
+  }
+};
